@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GoldTracker | Today's Precious Metal Rates</title>
+    <meta
+      name="description"
+      content="Live precious metal rates for gold, silver, and platinum with a premium, fast-loading experience."
+    />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' x2='100%25' y1='0%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23f7e2a6'/%3E%3Cstop offset='100%25' stop-color='%23c7962d'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='64' height='64' rx='18' fill='%23081217'/%3E%3Ccircle cx='32' cy='32' r='18' fill='url(%23g)'/%3E%3C/svg%3E"
+    />
+    <link
+      rel="preconnect"
+      href="https://api.lalithaajewellery.com"
+      crossorigin
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="page-shell">
+      <div class="page-noise" aria-hidden="true"></div>
+
+      <main class="dashboard" id="app" aria-live="polite">
+        <section class="hero-panel skeleton-panel" aria-hidden="true">
+          <div class="status-pill skeleton-block"></div>
+          <div class="hero-copy">
+            <div class="eyebrow skeleton-line short"></div>
+            <div class="title skeleton-line long"></div>
+            <div class="title skeleton-line medium"></div>
+            <div class="hero-price skeleton-line price"></div>
+            <div class="meta-row">
+              <div class="skeleton-line meta"></div>
+              <div class="skeleton-line meta short"></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="rates-panel skeleton-panel" aria-hidden="true">
+          <div class="panel-head">
+            <div class="eyebrow skeleton-line short"></div>
+            <div class="skeleton-line medium"></div>
+          </div>
+
+          <div class="supporting-grid">
+            <article class="rate-card">
+              <div class="skeleton-line short"></div>
+              <div class="skeleton-line medium"></div>
+              <div class="skeleton-line meta short"></div>
+            </article>
+            <article class="rate-card">
+              <div class="skeleton-line short"></div>
+              <div class="skeleton-line medium"></div>
+              <div class="skeleton-line meta short"></div>
+            </article>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <template id="dashboard-template">
+      <section class="hero-panel">
+        <div class="hero-surface">
+          <div class="status-pill">
+            <span class="pulse-dot"></span>
+            <span data-bind="statusLabel"></span>
+          </div>
+
+          <div class="hero-copy">
+            <p class="eyebrow" data-bind="todayLabel"></p>
+            <h1 class="hero-title">Today's gold rate</h1>
+            <p class="hero-subtitle">
+              Live precious metal pricing for Karnataka with a focus on the
+              latest published gold rate.
+            </p>
+
+            <div class="hero-price-row">
+              <div>
+                <p class="hero-price" data-bind="goldPrice"></p>
+                <p class="price-caption">Latest published gold price</p>
+              </div>
+              <div class="hero-ornament" aria-hidden="true">
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+            </div>
+
+            <dl class="meta-grid">
+              <div>
+                <dt>Rate updated</dt>
+                <dd data-bind="updatedTime"></dd>
+              </div>
+              <div>
+                <dt>Location</dt>
+                <dd data-bind="stateName"></dd>
+              </div>
+            </dl>
+          </div>
+        </div>
+      </section>
+
+      <section class="rates-panel">
+        <div class="panel-head">
+          <div>
+            <p class="eyebrow">Supporting rates</p>
+            <h2 class="panel-title">Silver and platinum</h2>
+          </div>
+          <p class="panel-note" data-bind="panelNote"></p>
+        </div>
+
+        <div class="supporting-grid">
+          <article class="rate-card silver-card">
+            <p class="card-label">Silver</p>
+            <p class="card-rate" data-bind="silverPrice"></p>
+            <p class="card-time" data-bind="silverTime"></p>
+          </article>
+
+          <article class="rate-card platinum-card">
+            <p class="card-label">Platinum</p>
+            <p class="card-rate" data-bind="platinumPrice"></p>
+            <p class="card-time" data-bind="platinumTime"></p>
+          </article>
+        </div>
+
+        <div class="footer-bar">
+          <p class="footer-copy" data-bind="cacheMessage"></p>
+          <button class="refresh-button" type="button" id="refresh-button">
+            Refresh rates
+          </button>
+        </div>
+      </section>
+    </template>
+
+    <template id="error-template">
+      <section class="hero-panel error-panel">
+        <div class="hero-surface">
+          <div class="status-pill error-pill">
+            <span class="pulse-dot"></span>
+            <span>Connection issue</span>
+          </div>
+
+          <div class="hero-copy">
+            <p class="eyebrow">Unable to load live pricing</p>
+            <h1 class="hero-title">Rates are temporarily unavailable</h1>
+            <p class="hero-subtitle" data-bind="errorMessage"></p>
+
+            <div class="footer-bar compact">
+              <p class="footer-copy">
+                Try again to request the latest gold, silver, and platinum
+                rates.
+              </p>
+              <button class="refresh-button" type="button" id="retry-button">
+                Try again
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </template>
+
+    <script src="./config.js"></script>
+    <script src="./script.js" defer></script>
+  </body>
+</html>
