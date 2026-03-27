@@ -8,6 +8,7 @@ const CACHE_TTL = 5 * 60 * 1000;
 const app = document.querySelector("#app");
 const dashboardTemplate = document.querySelector("#dashboard-template");
 const errorTemplate = document.querySelector("#error-template");
+let deferredInstallPrompt = null;
 
 const currencyFormatter = new Intl.NumberFormat("en-IN", {
   style: "currency",
@@ -33,6 +34,8 @@ const timeFormatter = new Intl.DateTimeFormat("en-IN", {
 initialize();
 
 async function initialize() {
+  registerServiceWorker();
+  bindInstallEvents();
   bindRefreshDuringSkeleton();
   await loadRates();
 }
@@ -195,7 +198,11 @@ function renderDashboard(payload, fromCache, warningMessage = "") {
   app.replaceChildren(fragment);
 
   const refreshButton = document.querySelector("#refresh-button");
+  const installButton = document.querySelector("#install-button");
+
   refreshButton?.addEventListener("click", () => loadRates(true));
+  installButton?.addEventListener("click", handleInstallClick);
+  syncInstallButton(installButton);
 }
 
 function renderError(message) {
@@ -333,4 +340,54 @@ function bindRefreshDuringSkeleton() {
       void loadRates(true);
     }
   });
+}
+
+function registerServiceWorker() {
+  if (!("serviceWorker" in navigator)) {
+    return;
+  }
+
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./sw.js").catch(() => {
+      /* Ignore service worker registration failures. */
+    });
+  });
+}
+
+function bindInstallEvents() {
+  window.addEventListener("beforeinstallprompt", (event) => {
+    event.preventDefault();
+    deferredInstallPrompt = event;
+    syncInstallButton(document.querySelector("#install-button"));
+  });
+
+  window.addEventListener("appinstalled", () => {
+    deferredInstallPrompt = null;
+    syncInstallButton(document.querySelector("#install-button"));
+  });
+}
+
+async function handleInstallClick() {
+  if (!deferredInstallPrompt) {
+    return;
+  }
+
+  deferredInstallPrompt.prompt();
+  await deferredInstallPrompt.userChoice;
+  deferredInstallPrompt = null;
+  syncInstallButton(document.querySelector("#install-button"));
+}
+
+function syncInstallButton(button) {
+  if (!button) {
+    return;
+  }
+
+  const isStandalone = window.matchMedia(
+    "(display-mode: standalone)",
+  ).matches;
+  const isIOSStandalone = window.navigator.standalone === true;
+  const shouldHide = isStandalone || isIOSStandalone || !deferredInstallPrompt;
+
+  button.classList.toggle("hidden", shouldHide);
 }
