@@ -223,6 +223,15 @@ select {
   letter-spacing: -0.04em;
 }
 
+.gold-purity-label {
+  margin: 0 0 8px;
+  color: var(--gold);
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
 .price-caption {
   margin-top: 10px;
 }

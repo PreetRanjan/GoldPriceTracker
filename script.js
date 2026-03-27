@@ -148,16 +148,23 @@ function normalizeMetal(metal) {
 
 function renderDashboard(payload, fromCache, warningMessage = "") {
   const fragment = dashboardTemplate.content.cloneNode(true);
+  const goldPricePerGram = payload.metals.gold.price;
 
   setText(fragment, "statusLabel", buildStatusLabel(payload.source, fromCache));
   setText(fragment, "todayLabel", fullDateFormatter.format(new Date()));
-  setText(
-    fragment,
-    "goldPrice",
-    currencyFormatter.format(payload.metals.gold.price),
-  );
+  setText(fragment, "goldPrice", currencyFormatter.format(goldPricePerGram));
   setText(fragment, "updatedTime", formatDateTime(payload.rateUpdatedTime));
   setText(fragment, "stateName", payload.stateName);
+  setText(
+    fragment,
+    "goldTenGramPrice",
+    currencyFormatter.format(goldPricePerGram * 10),
+  );
+  setText(
+    fragment,
+    "goldTwelveGramPrice",
+    currencyFormatter.format(goldPricePerGram * 12),
+  );
   setText(
     fragment,
     "silverPrice",
