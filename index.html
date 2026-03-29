@@ -18,7 +18,11 @@
       href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' x2='100%25' y1='0%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23f7e2a6'/%3E%3Cstop offset='100%25' stop-color='%23c7962d'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='64' height='64' rx='18' fill='%23081217'/%3E%3Ccircle cx='32' cy='32' r='18' fill='url(%23g)'/%3E%3C/svg%3E"
     />
     <link rel="manifest" href="./manifest.webmanifest" />
-    <link rel="apple-touch-icon" sizes="180x180" href="./icons/apple-touch-icon.png" />
+    <link
+      rel="apple-touch-icon"
+      sizes="180x180"
+      href="./icons/apple-touch-icon.png"
+    />
     <link
       rel="preconnect"
       href="https://api.lalithaajewellery.com"
@@ -105,6 +109,29 @@
                 <dt>Location</dt>
                 <dd data-bind="stateName"></dd>
               </div>
+              <div class="estimate-card">
+                <dt>Estimated 24K Gold</dt>
+                <dd
+                  class="estimate-card-price"
+                  data-bind="goldTwentyFourKPrice"
+                ></dd>
+                <p class="estimate-card-note">
+                  Estimated from the live 22K per-gram price
+                </p>
+                <div
+                  class="estimate-breakdown"
+                  aria-label="Estimated 24K gold weights"
+                >
+                  <div>
+                    <span>10g</span>
+                    <strong data-bind="goldTwentyFourKTenGramPrice"></strong>
+                  </div>
+                  <div>
+                    <span>12g</span>
+                    <strong data-bind="goldTwentyFourKTwelveGramPrice"></strong>
+                  </div>
+                </div>
+              </div>
               <div>
                 <dt>10 gram gold</dt>
                 <dd data-bind="goldTenGramPrice"></dd>
@@ -116,6 +143,121 @@
             </dl>
           </div>
         </div>
+      </section>
+
+      <section class="calculator-panel">
+        <section
+          class="buy-calculator-card"
+          aria-label="Gold buy price calculator"
+        >
+          <div class="buy-calculator-head">
+            <div>
+              <p class="eyebrow">Gold buy price</p>
+              <h2 class="buy-calculator-title">22K purchase calculator</h2>
+            </div>
+            <p class="buy-calculator-note">
+              Includes compulsory 3% GST. Making charges default to 3% and can
+              be adjusted.
+            </p>
+          </div>
+
+          <div class="gram-tabs" role="tablist" aria-label="Gold gram presets">
+            <button
+              class="gram-tab is-active"
+              type="button"
+              data-grams-option="1"
+              aria-selected="true"
+            >
+              1 gm
+            </button>
+            <button
+              class="gram-tab"
+              type="button"
+              data-grams-option="2"
+              aria-selected="false"
+            >
+              2 gm
+            </button>
+            <button
+              class="gram-tab"
+              type="button"
+              data-grams-option="4"
+              aria-selected="false"
+            >
+              4 gm
+            </button>
+            <button
+              class="gram-tab"
+              type="button"
+              data-grams-option="custom"
+              aria-selected="false"
+            >
+              Custom
+            </button>
+          </div>
+
+          <label class="custom-grams-field hidden" id="custom-grams-field">
+            <span>Custom grams</span>
+            <input
+              id="custom-grams-input"
+              type="number"
+              min="0.1"
+              step="0.1"
+              value="1"
+              inputmode="decimal"
+            />
+          </label>
+
+          <div class="calculator-controls">
+            <label class="making-range-field">
+              <span>Making charges slider</span>
+              <input
+                id="making-slider"
+                type="range"
+                min="0"
+                max="20"
+                step="0.1"
+                value="3"
+              />
+              <small>Slider range: 0% to 20%</small>
+            </label>
+
+            <label class="making-input-field">
+              <span>Making charges %</span>
+              <input
+                id="making-input"
+                type="number"
+                min="0"
+                step="0.1"
+                value="3"
+                inputmode="decimal"
+              />
+            </label>
+          </div>
+
+          <div class="calculator-breakdown" aria-live="polite">
+            <div>
+              <span>Selected grams</span>
+              <strong id="selected-grams-output">1 gm</strong>
+            </div>
+            <div>
+              <span>Base gold price</span>
+              <strong id="base-price-output"></strong>
+            </div>
+            <div>
+              <span>GST (3%)</span>
+              <strong id="gst-price-output"></strong>
+            </div>
+            <div>
+              <span>Making charges</span>
+              <strong id="making-price-output"></strong>
+            </div>
+            <div class="calculator-total-row">
+              <span>Final gold buy price</span>
+              <strong id="final-price-output"></strong>
+            </div>
+          </div>
+        </section>
       </section>
 
       <section class="rates-panel">

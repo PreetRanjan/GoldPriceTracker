@@ -239,6 +239,187 @@ select {
   margin-top: 10px;
 }
 
+.calculator-panel {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(232, 197, 109, 0.14);
+  border-radius: var(--radius-xl);
+  background:
+    radial-gradient(
+      circle at top left,
+      rgba(232, 197, 109, 0.18),
+      transparent 26%
+    ),
+    linear-gradient(145deg, rgba(18, 34, 44, 0.94), rgba(8, 18, 23, 0.96));
+  box-shadow: var(--shadow);
+}
+
+.calculator-panel::before {
+  content: "";
+  position: absolute;
+  inset: 1px;
+  border-radius: calc(var(--radius-xl) - 1px);
+  pointer-events: none;
+  background: linear-gradient(
+    160deg,
+    rgba(255, 255, 255, 0.07),
+    rgba(255, 255, 255, 0.01)
+  );
+}
+
+.buy-calculator-card {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 18px;
+  padding: clamp(24px, 4vw, 34px);
+}
+
+.buy-calculator-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.buy-calculator-title {
+  margin: 6px 0 0;
+  font-family: var(--title-font);
+  font-size: clamp(1.3rem, 3vw, 2rem);
+}
+
+.buy-calculator-note {
+  max-width: 30ch;
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+.gram-tabs {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.gram-tab {
+  appearance: none;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text);
+  padding: 10px 14px;
+  cursor: pointer;
+  font-weight: 600;
+  transition:
+    transform 160ms ease,
+    background-color 160ms ease,
+    border-color 160ms ease;
+}
+
+.gram-tab:hover,
+.gram-tab:focus-visible,
+.gram-tab.is-active {
+  transform: translateY(-1px);
+  background: linear-gradient(
+    135deg,
+    rgba(232, 197, 109, 0.18),
+    rgba(255, 255, 255, 0.06)
+  );
+  border-color: rgba(232, 197, 109, 0.28);
+  box-shadow: 0 10px 24px rgba(232, 197, 109, 0.12);
+}
+
+.gram-tab:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.45);
+  outline-offset: 2px;
+}
+
+.custom-grams-field,
+.making-range-field,
+.making-input-field {
+  display: grid;
+  gap: 8px;
+}
+
+.custom-grams-field span,
+.making-range-field span,
+.making-input-field span {
+  color: var(--muted);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.custom-grams-field input,
+.making-input-field input {
+  width: 100%;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text);
+  padding: 12px 14px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.making-range-field input[type="range"] {
+  width: 100%;
+  accent-color: var(--gold);
+}
+
+.making-range-field small {
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+.calculator-controls {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(180px, 0.8fr);
+  gap: 16px;
+}
+
+.calculator-breakdown {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.calculator-breakdown div {
+  display: grid;
+  gap: 6px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.045);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.calculator-breakdown span {
+  color: var(--muted);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.calculator-breakdown strong {
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.calculator-total-row {
+  grid-column: 1 / -1;
+  background: linear-gradient(
+    135deg,
+    rgba(232, 197, 109, 0.16),
+    rgba(255, 255, 255, 0.05)
+  ) !important;
+  border-color: rgba(232, 197, 109, 0.18) !important;
+  box-shadow: inset 0 1px 0 rgba(247, 226, 166, 0.16);
+}
+
 .hero-ornament {
   display: grid;
   gap: 10px;
@@ -294,6 +475,65 @@ select {
   margin: 0;
   font-size: 1.04rem;
   font-weight: 600;
+}
+
+.estimate-card {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: 10px;
+  padding: 16px 18px;
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(232, 197, 109, 0.16);
+  background: linear-gradient(
+    135deg,
+    rgba(232, 197, 109, 0.09),
+    rgba(255, 255, 255, 0.03)
+  );
+}
+
+.estimate-card dt {
+  margin: 0;
+  color: var(--gold);
+  font-size: 0.74rem;
+  letter-spacing: 0.14em;
+}
+
+.estimate-card .estimate-card-price {
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.estimate-card-note {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+
+.estimate-breakdown {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.estimate-breakdown div {
+  display: grid;
+  gap: 4px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.estimate-breakdown span {
+  color: var(--muted);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.estimate-breakdown strong {
+  font-size: 0.95rem;
+  font-weight: 700;
 }
 
 .rates-panel {
@@ -561,6 +801,7 @@ select {
 }
 
 @media (max-width: 900px) {
+  .buy-calculator-head,
   .hero-price-row,
   .panel-head,
   .footer-bar {
@@ -594,7 +835,22 @@ select {
   }
 
   .supporting-grid,
+  .calculator-controls,
+  .calculator-breakdown,
   .meta-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .gram-tabs {
+    border-radius: 24px;
+  }
+
+  .gram-tab {
+    flex: 1 1 calc(50% - 10px);
+    text-align: center;
+  }
+
+  .estimate-breakdown {
     grid-template-columns: 1fr;
   }
 

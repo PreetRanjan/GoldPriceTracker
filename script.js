@@ -4,6 +4,8 @@ const proxyConfig = window.GOLDTRACKER_PROXY_URL;
 const PROXY_URL = typeof proxyConfig === "string" ? proxyConfig.trim() : "";
 const CACHE_KEY = "gold-tracker-pricing-cache-v1";
 const CACHE_TTL = 5 * 60 * 1000;
+const GST_RATE = 3;
+const DEFAULT_MAKING_CHARGE = 3;
 
 const app = document.querySelector("#app");
 const dashboardTemplate = document.querySelector("#dashboard-template");
@@ -152,12 +154,28 @@ function normalizeMetal(metal) {
 function renderDashboard(payload, fromCache, warningMessage = "") {
   const fragment = dashboardTemplate.content.cloneNode(true);
   const goldPricePerGram = payload.metals.gold.price;
+  const estimatedTwentyFourKPrice = goldPricePerGram * (24 / 22);
 
   setText(fragment, "statusLabel", buildStatusLabel(payload.source, fromCache));
   setText(fragment, "todayLabel", fullDateFormatter.format(new Date()));
   setText(fragment, "goldPrice", currencyFormatter.format(goldPricePerGram));
   setText(fragment, "updatedTime", formatDateTime(payload.rateUpdatedTime));
   setText(fragment, "stateName", payload.stateName);
+  setText(
+    fragment,
+    "goldTwentyFourKPrice",
+    currencyFormatter.format(estimatedTwentyFourKPrice),
+  );
+  setText(
+    fragment,
+    "goldTwentyFourKTenGramPrice",
+    currencyFormatter.format(estimatedTwentyFourKPrice * 10),
+  );
+  setText(
+    fragment,
+    "goldTwentyFourKTwelveGramPrice",
+    currencyFormatter.format(estimatedTwentyFourKPrice * 12),
+  );
   setText(
     fragment,
     "goldTenGramPrice",
@@ -203,6 +221,7 @@ function renderDashboard(payload, fromCache, warningMessage = "") {
   refreshButton?.addEventListener("click", () => loadRates(true));
   installButton?.addEventListener("click", handleInstallClick);
   syncInstallButton(installButton);
+  initBuyCalculator(goldPricePerGram);
 }
 
 function renderError(message) {
@@ -383,11 +402,134 @@ function syncInstallButton(button) {
     return;
   }
 
-  const isStandalone = window.matchMedia(
-    "(display-mode: standalone)",
-  ).matches;
+  const isStandalone = window.matchMedia("(display-mode: standalone)").matches;
   const isIOSStandalone = window.navigator.standalone === true;
   const shouldHide = isStandalone || isIOSStandalone || !deferredInstallPrompt;
 
   button.classList.toggle("hidden", shouldHide);
+}
+
+function initBuyCalculator(goldPricePerGram) {
+  const gramButtons = Array.from(
+    document.querySelectorAll("[data-grams-option]"),
+  );
+  const customGramsField = document.querySelector("#custom-grams-field");
+  const customGramsInput = document.querySelector("#custom-grams-input");
+  const makingSlider = document.querySelector("#making-slider");
+  const makingInput = document.querySelector("#making-input");
+
+  if (
+    !gramButtons.length ||
+    !customGramsField ||
+    !customGramsInput ||
+    !makingSlider ||
+    !makingInput
+  ) {
+    return;
+  }
+
+  const state = {
+    gramsMode: "1",
+    customGrams: 1,
+    makingPercent: DEFAULT_MAKING_CHARGE,
+  };
+
+  const render = () => {
+    const grams =
+      state.gramsMode === "custom"
+        ? sanitizePositiveNumber(state.customGrams, 1)
+        : Number(state.gramsMode);
+    const basePrice = goldPricePerGram * grams;
+    const gstAmount = basePrice * (GST_RATE / 100);
+    const makingAmount =
+      basePrice * (sanitizePositiveNumber(state.makingPercent, 0) / 100);
+    const finalPrice = basePrice + gstAmount + makingAmount;
+
+    customGramsField.classList.toggle("hidden", state.gramsMode !== "custom");
+    gramButtons.forEach((button) => {
+      button.classList.toggle(
+        "is-active",
+        button.dataset.gramsOption === state.gramsMode,
+      );
+      button.setAttribute(
+        "aria-selected",
+        String(button.dataset.gramsOption === state.gramsMode),
+      );
+    });
+
+    setNodeText("#selected-grams-output", formatGramLabel(grams));
+    setNodeText("#base-price-output", currencyFormatter.format(basePrice));
+    setNodeText("#gst-price-output", currencyFormatter.format(gstAmount));
+    setNodeText(
+      "#making-price-output",
+      `${currencyFormatter.format(makingAmount)} (${trimPercent(state.makingPercent)}%)`,
+    );
+    setNodeText("#final-price-output", currencyFormatter.format(finalPrice));
+  };
+
+  gramButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      state.gramsMode = button.dataset.gramsOption || "1";
+
+      if (state.gramsMode !== "custom") {
+        state.customGrams = sanitizePositiveNumber(customGramsInput.value, 1);
+      } else {
+        customGramsInput.focus();
+      }
+
+      render();
+    });
+  });
+
+  customGramsInput.addEventListener("input", () => {
+    state.gramsMode = "custom";
+    state.customGrams = sanitizePositiveNumber(customGramsInput.value, 1);
+    render();
+  });
+
+  makingSlider.addEventListener("input", () => {
+    state.makingPercent = sanitizePositiveNumber(
+      makingSlider.value,
+      DEFAULT_MAKING_CHARGE,
+    );
+    makingInput.value = trimPercent(state.makingPercent);
+    render();
+  });
+
+  makingInput.addEventListener("input", () => {
+    state.makingPercent = sanitizePositiveNumber(makingInput.value, 0);
+    makingSlider.value = String(Math.min(state.makingPercent, 20));
+    render();
+  });
+
+  makingInput.value = trimPercent(DEFAULT_MAKING_CHARGE);
+  makingSlider.value = String(DEFAULT_MAKING_CHARGE);
+  render();
+}
+
+function setNodeText(selector, value) {
+  const node = document.querySelector(selector);
+
+  if (node) {
+    node.textContent = value;
+  }
+}
+
+function sanitizePositiveNumber(value, fallback) {
+  const parsed = Number(value);
+
+  if (!Number.isFinite(parsed) || parsed <= 0) {
+    return fallback;
+  }
+
+  return parsed;
+}
+
+function trimPercent(value) {
+  return Number(value).toFixed(1).replace(/\.0$/, "");
+}
+
+function formatGramLabel(value) {
+  const formatted = Number(value).toFixed(1).replace(/\.0$/, "");
+  return `${formatted} gm`;
 }
