@@ -1,6 +1,10 @@
 const UPSTREAM_URL =
   "https://api.lalithaajewellery.com/public/pricings/latest?state_id=fbe51d69-c3ef-466f-a8f4-7c382759e35f";
-const ALLOWED_ORIGINS = new Set(["https://preetranjan.github.io"]);
+const ALLOWED_ORIGINS = new Set([
+  "https://preetranjan.github.io",
+  "https://goldpricetracker.pages.dev",
+]);
+const ALLOWED_ORIGIN_SUFFIXES = [".goldpricetracker.pages.dev"];
 
 export default {
   async fetch(request) {
@@ -103,7 +107,17 @@ function handleOptions(origin) {
 }
 
 function isAllowedOrigin(origin) {
-  return typeof origin === "string" && ALLOWED_ORIGINS.has(origin);
+  if (typeof origin !== "string") {
+    return false;
+  }
+
+  if (ALLOWED_ORIGINS.has(origin)) {
+    return true;
+  }
+
+  return ALLOWED_ORIGIN_SUFFIXES.some((suffix) =>
+    origin.endsWith(suffix) && origin.startsWith("https://"),
+  );
 }
 
 function corsHeaders(origin) {
