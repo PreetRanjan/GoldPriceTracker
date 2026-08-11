@@ -258,6 +258,85 @@
             </div>
           </div>
         </section>
+
+        <section
+          class="buy-calculator-card"
+          aria-label="Grams from price calculator"
+        >
+          <div class="buy-calculator-head">
+            <div>
+              <p class="eyebrow">Price to grams</p>
+              <h2 class="buy-calculator-title">How many grams can I buy?</h2>
+            </div>
+            <p class="buy-calculator-note">
+              Enter your budget. Compulsory 3% GST and adjustable making charges
+              are deducted to find the gold weight.
+            </p>
+          </div>
+
+          <label class="budget-price-field">
+            <span>Budget amount (INR)</span>
+            <input
+              id="budget-price-input"
+              type="number"
+              min="1"
+              step="1"
+              value="10000"
+              inputmode="decimal"
+            />
+          </label>
+
+          <div class="calculator-controls">
+            <label class="making-range-field">
+              <span>Making charges slider</span>
+              <input
+                id="reverse-making-slider"
+                type="range"
+                min="0"
+                max="20"
+                step="0.1"
+                value="3"
+              />
+              <small>Slider range: 0% to 20%</small>
+            </label>
+
+            <label class="making-input-field">
+              <span>Making charges %</span>
+              <input
+                id="reverse-making-input"
+                type="number"
+                min="0"
+                step="0.1"
+                value="3"
+                inputmode="decimal"
+              />
+            </label>
+          </div>
+
+          <div class="grams-result-panel" aria-live="polite">
+            <span>Gold weight you can buy</span>
+            <strong id="grams-from-price-output">— gm</strong>
+          </div>
+
+          <div class="calculator-breakdown">
+            <div>
+              <span>Budget</span>
+              <strong id="budget-price-output"></strong>
+            </div>
+            <div>
+              <span>Base gold price</span>
+              <strong id="reverse-base-price-output"></strong>
+            </div>
+            <div>
+              <span>GST (3%)</span>
+              <strong id="reverse-gst-price-output"></strong>
+            </div>
+            <div>
+              <span>Making charges</span>
+              <strong id="reverse-making-price-output"></strong>
+            </div>
+          </div>
+        </section>
       </section>
 
       <section class="rates-panel">

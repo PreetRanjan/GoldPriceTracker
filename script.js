@@ -222,6 +222,7 @@ function renderDashboard(payload, fromCache, warningMessage = "") {
   installButton?.addEventListener("click", handleInstallClick);
   syncInstallButton(installButton);
   initBuyCalculator(goldPricePerGram);
+  initGramsFromPriceCalculator(goldPricePerGram);
 }
 
 function renderError(message) {
@@ -439,11 +440,11 @@ function initBuyCalculator(goldPricePerGram) {
       state.gramsMode === "custom"
         ? sanitizePositiveNumber(state.customGrams, 1)
         : Number(state.gramsMode);
-    const basePrice = goldPricePerGram * grams;
-    const gstAmount = basePrice * (GST_RATE / 100);
-    const makingAmount =
-      basePrice * (sanitizePositiveNumber(state.makingPercent, 0) / 100);
-    const finalPrice = basePrice + gstAmount + makingAmount;
+    const breakdown = calculateBuyBreakdown(
+      goldPricePerGram,
+      grams,
+      state.makingPercent,
+    );
 
     customGramsField.classList.toggle("hidden", state.gramsMode !== "custom");
     gramButtons.forEach((button) => {
@@ -457,14 +458,23 @@ function initBuyCalculator(goldPricePerGram) {
       );
     });
 
-    setNodeText("#selected-grams-output", formatGramLabel(grams));
-    setNodeText("#base-price-output", currencyFormatter.format(basePrice));
-    setNodeText("#gst-price-output", currencyFormatter.format(gstAmount));
+    setNodeText("#selected-grams-output", formatGramLabel(breakdown.grams));
+    setNodeText(
+      "#base-price-output",
+      currencyFormatter.format(breakdown.basePrice),
+    );
+    setNodeText(
+      "#gst-price-output",
+      currencyFormatter.format(breakdown.gstAmount),
+    );
     setNodeText(
       "#making-price-output",
-      `${currencyFormatter.format(makingAmount)} (${trimPercent(state.makingPercent)}%)`,
+      `${currencyFormatter.format(breakdown.makingAmount)} (${trimPercent(breakdown.makingPercent)}%)`,
     );
-    setNodeText("#final-price-output", currencyFormatter.format(finalPrice));
+    setNodeText(
+      "#final-price-output",
+      currencyFormatter.format(breakdown.finalPrice),
+    );
   };
 
   gramButtons.forEach((button) => {
@@ -488,7 +498,7 @@ function initBuyCalculator(goldPricePerGram) {
   });
 
   makingSlider.addEventListener("input", () => {
-    state.makingPercent = sanitizePositiveNumber(
+    state.makingPercent = sanitizeNonNegativeNumber(
       makingSlider.value,
       DEFAULT_MAKING_CHARGE,
     );
@@ -497,7 +507,7 @@ function initBuyCalculator(goldPricePerGram) {
   });
 
   makingInput.addEventListener("input", () => {
-    state.makingPercent = sanitizePositiveNumber(makingInput.value, 0);
+    state.makingPercent = sanitizeNonNegativeNumber(makingInput.value, 0);
     makingSlider.value = String(Math.min(state.makingPercent, 20));
     render();
   });
@@ -505,6 +515,127 @@ function initBuyCalculator(goldPricePerGram) {
   makingInput.value = trimPercent(DEFAULT_MAKING_CHARGE);
   makingSlider.value = String(DEFAULT_MAKING_CHARGE);
   render();
+}
+
+function initGramsFromPriceCalculator(goldPricePerGram) {
+  const budgetPriceInput = document.querySelector("#budget-price-input");
+  const makingSlider = document.querySelector("#reverse-making-slider");
+  const makingInput = document.querySelector("#reverse-making-input");
+  const gramsOutput = document.querySelector("#grams-from-price-output");
+
+  if (
+    !budgetPriceInput ||
+    !makingSlider ||
+    !makingInput ||
+    !gramsOutput ||
+    !Number.isFinite(goldPricePerGram) ||
+    goldPricePerGram <= 0
+  ) {
+    return;
+  }
+
+  const defaultBudget = Math.round(
+    calculateBuyBreakdown(goldPricePerGram, 1, DEFAULT_MAKING_CHARGE)
+      .finalPrice,
+  );
+
+  const state = {
+    budgetPrice: defaultBudget,
+    makingPercent: DEFAULT_MAKING_CHARGE,
+  };
+
+  budgetPriceInput.value = String(defaultBudget);
+
+  const render = () => {
+    const breakdown = calculateGramsFromBudget(
+      goldPricePerGram,
+      state.budgetPrice,
+      state.makingPercent,
+    );
+
+    setNodeText(
+      "#budget-price-output",
+      currencyFormatter.format(breakdown.budgetPrice),
+    );
+    setNodeText(
+      "#reverse-base-price-output",
+      currencyFormatter.format(breakdown.basePrice),
+    );
+    setNodeText(
+      "#reverse-gst-price-output",
+      currencyFormatter.format(breakdown.gstAmount),
+    );
+    setNodeText(
+      "#reverse-making-price-output",
+      `${currencyFormatter.format(breakdown.makingAmount)} (${trimPercent(breakdown.makingPercent)}%)`,
+    );
+    gramsOutput.textContent = formatPreciseGramLabel(breakdown.grams);
+  };
+
+  budgetPriceInput.addEventListener("input", () => {
+    state.budgetPrice = sanitizePositiveNumber(budgetPriceInput.value, 0);
+    render();
+  });
+
+  makingSlider.addEventListener("input", () => {
+    state.makingPercent = sanitizeNonNegativeNumber(
+      makingSlider.value,
+      DEFAULT_MAKING_CHARGE,
+    );
+    makingInput.value = trimPercent(state.makingPercent);
+    render();
+  });
+
+  makingInput.addEventListener("input", () => {
+    state.makingPercent = sanitizeNonNegativeNumber(makingInput.value, 0);
+    makingSlider.value = String(Math.min(state.makingPercent, 20));
+    render();
+  });
+
+  makingInput.value = trimPercent(DEFAULT_MAKING_CHARGE);
+  makingSlider.value = String(DEFAULT_MAKING_CHARGE);
+  render();
+}
+
+function calculateBuyBreakdown(goldPricePerGram, grams, makingPercent) {
+  const safeGrams = sanitizePositiveNumber(grams, 0);
+  const safeMakingPercent = sanitizeNonNegativeNumber(makingPercent, 0);
+  const basePrice = goldPricePerGram * safeGrams;
+  const gstAmount = basePrice * (GST_RATE / 100);
+  const makingAmount = basePrice * (safeMakingPercent / 100);
+
+  return {
+    grams: safeGrams,
+    makingPercent: safeMakingPercent,
+    basePrice,
+    gstAmount,
+    makingAmount,
+    finalPrice: basePrice + gstAmount + makingAmount,
+  };
+}
+
+function calculateGramsFromBudget(
+  goldPricePerGram,
+  budgetPrice,
+  makingPercent,
+) {
+  const safeBudget = sanitizePositiveNumber(budgetPrice, 0);
+  const safeMakingPercent = sanitizeNonNegativeNumber(makingPercent, 0);
+  const chargeMultiplier = 1 + GST_RATE / 100 + safeMakingPercent / 100;
+  const basePrice = safeBudget / chargeMultiplier;
+  const gstAmount = basePrice * (GST_RATE / 100);
+  const makingAmount = basePrice * (safeMakingPercent / 100);
+  const grams =
+    goldPricePerGram > 0 ? basePrice / goldPricePerGram : 0;
+
+  return {
+    budgetPrice: safeBudget,
+    makingPercent: safeMakingPercent,
+    basePrice,
+    gstAmount,
+    makingAmount,
+    grams,
+  };
 }
 
 function setNodeText(selector, value) {
@@ -525,6 +656,16 @@ function sanitizePositiveNumber(value, fallback) {
   return parsed;
 }
 
+function sanitizeNonNegativeNumber(value, fallback) {
+  const parsed = Number(value);
+
+  if (!Number.isFinite(parsed) || parsed < 0) {
+    return fallback;
+  }
+
+  return parsed;
+}
+
 function trimPercent(value) {
   return Number(value).toFixed(1).replace(/\.0$/, "");
 }
@@ -532,4 +673,15 @@ function trimPercent(value) {
 function formatGramLabel(value) {
   const formatted = Number(value).toFixed(1).replace(/\.0$/, "");
   return `${formatted} gm`;
+}
+
+function formatPreciseGramLabel(value) {
+  if (!Number.isFinite(value) || value <= 0) {
+    return "0 gm";
+  }
+
+  return `${value.toLocaleString("en-IN", {
+    maximumFractionDigits: 3,
+    minimumFractionDigits: 0,
+  })} gm`;
 }

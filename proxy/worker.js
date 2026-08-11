@@ -115,8 +115,8 @@ function isAllowedOrigin(origin) {
     return true;
   }
 
-  return ALLOWED_ORIGIN_SUFFIXES.some((suffix) =>
-    origin.endsWith(suffix) && origin.startsWith("https://"),
+  return ALLOWED_ORIGIN_SUFFIXES.some(
+    (suffix) => origin.endsWith(suffix) && origin.startsWith("https://"),
   );
 }
 
