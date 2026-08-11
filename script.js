@@ -173,11 +173,6 @@ function renderDashboard(payload, fromCache, warningMessage = "") {
   );
   setText(
     fragment,
-    "goldTwentyFourKTwelveGramPrice",
-    currencyFormatter.format(estimatedTwentyFourKPrice * 12),
-  );
-  setText(
-    fragment,
     "goldTenGramPrice",
     currencyFormatter.format(goldPricePerGram * 10),
   );
@@ -193,25 +188,14 @@ function renderDashboard(payload, fromCache, warningMessage = "") {
   );
   setText(
     fragment,
-    "silverTime",
-    `Silver updated ${formatDateTime(payload.metals.silver.updatedAt)}`,
-  );
-  setText(
-    fragment,
     "platinumPrice",
     currencyFormatter.format(payload.metals.platinum.price),
-  );
-  setText(
-    fragment,
-    "platinumTime",
-    `Platinum updated ${formatDateTime(payload.metals.platinum.updatedAt)}`,
   );
   setText(
     fragment,
     "cacheMessage",
     buildCacheMessage(payload.source, fromCache, warningMessage),
   );
-  setText(fragment, "panelNote", buildPanelNote(payload.source));
 
   app.replaceChildren(fragment);
 
@@ -221,8 +205,7 @@ function renderDashboard(payload, fromCache, warningMessage = "") {
   refreshButton?.addEventListener("click", () => loadRates(true));
   installButton?.addEventListener("click", handleInstallClick);
   syncInstallButton(installButton);
-  initBuyCalculator(goldPricePerGram);
-  initGramsFromPriceCalculator(goldPricePerGram);
+  initCalculators(goldPricePerGram);
 }
 
 function renderError(message) {
@@ -244,14 +227,6 @@ function setText(root, bindingName, value) {
   if (node) {
     node.textContent = value;
   }
-}
-
-function buildPanelNote(source) {
-  if (source === "proxy") {
-    return "Rates are being served through the fallback proxy for GitHub Pages compatibility.";
-  }
-
-  return "Anonymous API fetch. Cached briefly for faster repeat visits.";
 }
 
 function buildStatusLabel(source, fromCache) {
@@ -410,32 +385,71 @@ function syncInstallButton(button) {
   button.classList.toggle("hidden", shouldHide);
 }
 
-function initBuyCalculator(goldPricePerGram) {
+function initCalculators(goldPricePerGram) {
+  const modeButtons = Array.from(document.querySelectorAll("[data-calc-mode]"));
+  const buyPane = document.querySelector("#calc-pane-buy");
+  const budgetPane = document.querySelector("#calc-pane-budget");
   const gramButtons = Array.from(
     document.querySelectorAll("[data-grams-option]"),
   );
   const customGramsField = document.querySelector("#custom-grams-field");
   const customGramsInput = document.querySelector("#custom-grams-input");
+  const budgetPriceInput = document.querySelector("#budget-price-input");
   const makingSlider = document.querySelector("#making-slider");
   const makingInput = document.querySelector("#making-input");
+  const gramsOutput = document.querySelector("#grams-from-price-output");
 
   if (
+    !modeButtons.length ||
+    !buyPane ||
+    !budgetPane ||
     !gramButtons.length ||
     !customGramsField ||
     !customGramsInput ||
+    !budgetPriceInput ||
     !makingSlider ||
-    !makingInput
+    !makingInput ||
+    !gramsOutput ||
+    !Number.isFinite(goldPricePerGram) ||
+    goldPricePerGram <= 0
   ) {
     return;
   }
 
+  const defaultBudget = Math.round(
+    calculateBuyBreakdown(goldPricePerGram, 1, DEFAULT_MAKING_CHARGE)
+      .finalPrice,
+  );
+
   const state = {
+    calcMode: "buy",
     gramsMode: "1",
     customGrams: 1,
+    budgetPrice: defaultBudget,
     makingPercent: DEFAULT_MAKING_CHARGE,
   };
 
-  const render = () => {
+  budgetPriceInput.value = String(defaultBudget);
+  makingInput.value = trimPercent(DEFAULT_MAKING_CHARGE);
+  makingSlider.value = String(DEFAULT_MAKING_CHARGE);
+
+  const setCalcMode = (mode) => {
+    state.calcMode = mode === "budget" ? "budget" : "buy";
+    const showBuy = state.calcMode === "buy";
+
+    buyPane.classList.toggle("hidden", !showBuy);
+    budgetPane.classList.toggle("hidden", showBuy);
+    buyPane.hidden = !showBuy;
+    budgetPane.hidden = showBuy;
+
+    modeButtons.forEach((button) => {
+      const isActive = button.dataset.calcMode === state.calcMode;
+      button.classList.toggle("is-active", isActive);
+      button.setAttribute("aria-selected", String(isActive));
+    });
+  };
+
+  const renderBuy = () => {
     const grams =
       state.gramsMode === "custom"
         ? sanitizePositiveNumber(state.customGrams, 1)
@@ -477,76 +491,7 @@ function initBuyCalculator(goldPricePerGram) {
     );
   };
 
-  gramButtons.forEach((button) => {
-    button.addEventListener("click", () => {
-      state.gramsMode = button.dataset.gramsOption || "1";
-
-      if (state.gramsMode !== "custom") {
-        state.customGrams = sanitizePositiveNumber(customGramsInput.value, 1);
-      } else {
-        customGramsInput.focus();
-      }
-
-      render();
-    });
-  });
-
-  customGramsInput.addEventListener("input", () => {
-    state.gramsMode = "custom";
-    state.customGrams = sanitizePositiveNumber(customGramsInput.value, 1);
-    render();
-  });
-
-  makingSlider.addEventListener("input", () => {
-    state.makingPercent = sanitizeNonNegativeNumber(
-      makingSlider.value,
-      DEFAULT_MAKING_CHARGE,
-    );
-    makingInput.value = trimPercent(state.makingPercent);
-    render();
-  });
-
-  makingInput.addEventListener("input", () => {
-    state.makingPercent = sanitizeNonNegativeNumber(makingInput.value, 0);
-    makingSlider.value = String(Math.min(state.makingPercent, 20));
-    render();
-  });
-
-  makingInput.value = trimPercent(DEFAULT_MAKING_CHARGE);
-  makingSlider.value = String(DEFAULT_MAKING_CHARGE);
-  render();
-}
-
-function initGramsFromPriceCalculator(goldPricePerGram) {
-  const budgetPriceInput = document.querySelector("#budget-price-input");
-  const makingSlider = document.querySelector("#reverse-making-slider");
-  const makingInput = document.querySelector("#reverse-making-input");
-  const gramsOutput = document.querySelector("#grams-from-price-output");
-
-  if (
-    !budgetPriceInput ||
-    !makingSlider ||
-    !makingInput ||
-    !gramsOutput ||
-    !Number.isFinite(goldPricePerGram) ||
-    goldPricePerGram <= 0
-  ) {
-    return;
-  }
-
-  const defaultBudget = Math.round(
-    calculateBuyBreakdown(goldPricePerGram, 1, DEFAULT_MAKING_CHARGE)
-      .finalPrice,
-  );
-
-  const state = {
-    budgetPrice: defaultBudget,
-    makingPercent: DEFAULT_MAKING_CHARGE,
-  };
-
-  budgetPriceInput.value = String(defaultBudget);
-
-  const render = () => {
+  const renderBudget = () => {
     const breakdown = calculateGramsFromBudget(
       goldPricePerGram,
       state.budgetPrice,
@@ -572,9 +517,40 @@ function initGramsFromPriceCalculator(goldPricePerGram) {
     gramsOutput.textContent = formatPreciseGramLabel(breakdown.grams);
   };
 
+  const render = () => {
+    renderBuy();
+    renderBudget();
+  };
+
+  modeButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      setCalcMode(button.dataset.calcMode);
+    });
+  });
+
+  gramButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      state.gramsMode = button.dataset.gramsOption || "1";
+
+      if (state.gramsMode !== "custom") {
+        state.customGrams = sanitizePositiveNumber(customGramsInput.value, 1);
+      } else {
+        customGramsInput.focus();
+      }
+
+      renderBuy();
+    });
+  });
+
+  customGramsInput.addEventListener("input", () => {
+    state.gramsMode = "custom";
+    state.customGrams = sanitizePositiveNumber(customGramsInput.value, 1);
+    renderBuy();
+  });
+
   budgetPriceInput.addEventListener("input", () => {
     state.budgetPrice = sanitizePositiveNumber(budgetPriceInput.value, 0);
-    render();
+    renderBudget();
   });
 
   makingSlider.addEventListener("input", () => {
@@ -592,8 +568,7 @@ function initGramsFromPriceCalculator(goldPricePerGram) {
     render();
   });
 
-  makingInput.value = trimPercent(DEFAULT_MAKING_CHARGE);
-  makingSlider.value = String(DEFAULT_MAKING_CHARGE);
+  setCalcMode("buy");
   render();
 }
 

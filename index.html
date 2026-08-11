@@ -49,24 +49,10 @@
           </div>
         </section>
 
-        <section class="rates-panel skeleton-panel" aria-hidden="true">
-          <div class="panel-head">
-            <div class="eyebrow skeleton-line short"></div>
-            <div class="skeleton-line medium"></div>
-          </div>
-
-          <div class="supporting-grid">
-            <article class="rate-card">
-              <div class="skeleton-line short"></div>
-              <div class="skeleton-line medium"></div>
-              <div class="skeleton-line meta short"></div>
-            </article>
-            <article class="rate-card">
-              <div class="skeleton-line short"></div>
-              <div class="skeleton-line medium"></div>
-              <div class="skeleton-line meta short"></div>
-            </article>
-          </div>
+        <section class="calculator-panel skeleton-panel" aria-hidden="true">
+          <div class="eyebrow skeleton-line short"></div>
+          <div class="skeleton-line medium"></div>
+          <div class="skeleton-line long"></div>
         </section>
       </main>
     </div>
@@ -74,143 +60,109 @@
     <template id="dashboard-template">
       <section class="hero-panel">
         <div class="hero-surface">
-          <div class="status-pill">
-            <span class="pulse-dot"></span>
-            <span data-bind="statusLabel"></span>
+          <div class="hero-top">
+            <div class="status-pill">
+              <span class="pulse-dot"></span>
+              <span data-bind="statusLabel"></span>
+            </div>
+            <p class="eyebrow" data-bind="todayLabel"></p>
           </div>
 
           <div class="hero-copy">
-            <p class="eyebrow" data-bind="todayLabel"></p>
+            <p class="brand-mark">GoldTracker</p>
             <h1 class="hero-title">Today's gold rate</h1>
             <p class="hero-subtitle">
-              Live precious metal pricing for Karnataka with a focus on the
-              latest published gold rate.
+              Live 22K pricing for Karnataka, with quick buy and budget tools.
             </p>
 
-            <div class="hero-price-row">
-              <div>
-                <p class="gold-purity-label">22K Gold price</p>
-                <p class="hero-price" data-bind="goldPrice"></p>
-                <p class="price-caption">Latest published 22K price per gram</p>
-              </div>
-              <div class="hero-ornament" aria-hidden="true">
-                <span></span>
-                <span></span>
-                <span></span>
-              </div>
+            <div class="hero-price-block">
+              <p class="gold-purity-label">22K · per gram</p>
+              <p class="hero-price" data-bind="goldPrice"></p>
+              <p class="hero-meta-line">
+                <span data-bind="stateName"></span>
+                <span aria-hidden="true">·</span>
+                <span data-bind="updatedTime"></span>
+              </p>
             </div>
 
-            <dl class="meta-grid">
+            <dl class="weight-strip" aria-label="Gold weight prices">
               <div>
-                <dt>Rate updated</dt>
-                <dd data-bind="updatedTime"></dd>
-              </div>
-              <div>
-                <dt>Location</dt>
-                <dd data-bind="stateName"></dd>
-              </div>
-              <div class="estimate-card">
-                <dt>Estimated 24K Gold</dt>
-                <dd
-                  class="estimate-card-price"
-                  data-bind="goldTwentyFourKPrice"
-                ></dd>
-                <p class="estimate-card-note">
-                  Estimated from the live 22K per-gram price
-                </p>
-                <div
-                  class="estimate-breakdown"
-                  aria-label="Estimated 24K gold weights"
-                >
-                  <div>
-                    <span>10g</span>
-                    <strong data-bind="goldTwentyFourKTenGramPrice"></strong>
-                  </div>
-                  <div>
-                    <span>12g</span>
-                    <strong data-bind="goldTwentyFourKTwelveGramPrice"></strong>
-                  </div>
-                </div>
-              </div>
-              <div>
-                <dt>10 gram gold</dt>
+                <dt>10g 22K</dt>
                 <dd data-bind="goldTenGramPrice"></dd>
               </div>
               <div>
-                <dt>12 gram gold</dt>
+                <dt>12g 22K</dt>
                 <dd data-bind="goldTwelveGramPrice"></dd>
               </div>
+              <div>
+                <dt>24K /g</dt>
+                <dd data-bind="goldTwentyFourKPrice"></dd>
+              </div>
+              <div>
+                <dt>10g 24K</dt>
+                <dd data-bind="goldTwentyFourKTenGramPrice"></dd>
+              </div>
             </dl>
+
+            <div class="metal-strip" aria-label="Supporting metal rates">
+              <div>
+                <p class="metal-label">Silver</p>
+                <p class="metal-rate" data-bind="silverPrice"></p>
+              </div>
+              <div>
+                <p class="metal-label">Platinum</p>
+                <p class="metal-rate" data-bind="platinumPrice"></p>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
-      <section class="calculator-panel">
-        <section
-          class="buy-calculator-card"
-          aria-label="Gold buy price calculator"
-        >
+      <section class="calculator-panel" aria-label="Gold calculators">
+        <div class="calculator-shell">
           <div class="buy-calculator-head">
             <div>
-              <p class="eyebrow">Gold buy price</p>
-              <h2 class="buy-calculator-title">22K purchase calculator</h2>
+              <p class="eyebrow">Calculators</p>
+              <h2 class="buy-calculator-title">Plan your purchase</h2>
             </div>
             <p class="buy-calculator-note">
-              Includes compulsory 3% GST. Making charges default to 3% and can
-              be adjusted.
+              3% GST is included. Making charges default to 3% and can be
+              adjusted.
             </p>
           </div>
 
-          <div class="gram-tabs" role="tablist" aria-label="Gold gram presets">
+          <div
+            class="calc-mode-tabs"
+            role="tablist"
+            aria-label="Calculator mode"
+          >
             <button
-              class="gram-tab is-active"
+              class="calc-mode-tab is-active"
               type="button"
-              data-grams-option="1"
+              role="tab"
+              id="calc-mode-buy"
+              data-calc-mode="buy"
               aria-selected="true"
+              aria-controls="calc-pane-buy"
             >
-              1 gm
+              Grams to price
             </button>
             <button
-              class="gram-tab"
+              class="calc-mode-tab"
               type="button"
-              data-grams-option="2"
+              role="tab"
+              id="calc-mode-budget"
+              data-calc-mode="budget"
               aria-selected="false"
+              aria-controls="calc-pane-budget"
             >
-              2 gm
-            </button>
-            <button
-              class="gram-tab"
-              type="button"
-              data-grams-option="4"
-              aria-selected="false"
-            >
-              4 gm
-            </button>
-            <button
-              class="gram-tab"
-              type="button"
-              data-grams-option="custom"
-              aria-selected="false"
-            >
-              Custom
+              Price to grams
             </button>
           </div>
 
-          <label class="custom-grams-field hidden" id="custom-grams-field">
-            <span>Custom grams</span>
-            <input
-              id="custom-grams-input"
-              type="number"
-              min="0.1"
-              step="0.1"
-              value="1"
-              inputmode="decimal"
-            />
-          </label>
-
           <div class="calculator-controls">
             <label class="making-range-field">
-              <span>Making charges slider</span>
+              <span>Making charges</span>
               <input
                 id="making-slider"
                 type="range"
@@ -219,11 +171,11 @@
                 step="0.1"
                 value="3"
               />
-              <small>Slider range: 0% to 20%</small>
+              <small>0% to 20%</small>
             </label>
 
             <label class="making-input-field">
-              <span>Making charges %</span>
+              <span>Making %</span>
               <input
                 id="making-input"
                 type="number"
@@ -235,150 +187,146 @@
             </label>
           </div>
 
-          <div class="calculator-breakdown" aria-live="polite">
-            <div>
-              <span>Selected grams</span>
-              <strong id="selected-grams-output">1 gm</strong>
+          <div
+            class="calc-pane"
+            id="calc-pane-buy"
+            role="tabpanel"
+            aria-labelledby="calc-mode-buy"
+          >
+            <div class="gram-tabs" role="tablist" aria-label="Gold gram presets">
+              <button
+                class="gram-tab is-active"
+                type="button"
+                data-grams-option="1"
+                aria-selected="true"
+              >
+                1 gm
+              </button>
+              <button
+                class="gram-tab"
+                type="button"
+                data-grams-option="2"
+                aria-selected="false"
+              >
+                2 gm
+              </button>
+              <button
+                class="gram-tab"
+                type="button"
+                data-grams-option="4"
+                aria-selected="false"
+              >
+                4 gm
+              </button>
+              <button
+                class="gram-tab"
+                type="button"
+                data-grams-option="custom"
+                aria-selected="false"
+              >
+                Custom
+              </button>
             </div>
-            <div>
-              <span>Base gold price</span>
-              <strong id="base-price-output"></strong>
-            </div>
-            <div>
-              <span>GST (3%)</span>
-              <strong id="gst-price-output"></strong>
-            </div>
-            <div>
-              <span>Making charges</span>
-              <strong id="making-price-output"></strong>
-            </div>
-            <div class="calculator-total-row">
-              <span>Final gold buy price</span>
-              <strong id="final-price-output"></strong>
-            </div>
-          </div>
-        </section>
 
-        <section
-          class="buy-calculator-card"
-          aria-label="Grams from price calculator"
-        >
-          <div class="buy-calculator-head">
-            <div>
-              <p class="eyebrow">Price to grams</p>
-              <h2 class="buy-calculator-title">How many grams can I buy?</h2>
-            </div>
-            <p class="buy-calculator-note">
-              Enter your budget. Compulsory 3% GST and adjustable making charges
-              are deducted to find the gold weight.
-            </p>
-          </div>
-
-          <label class="budget-price-field">
-            <span>Budget amount (INR)</span>
-            <input
-              id="budget-price-input"
-              type="number"
-              min="1"
-              step="1"
-              value="10000"
-              inputmode="decimal"
-              placeholder="Enter budget in INR"
-            />
-          </label>
-
-          <div class="calculator-controls">
-            <label class="making-range-field">
-              <span>Making charges slider</span>
+            <label class="custom-grams-field hidden" id="custom-grams-field">
+              <span>Custom grams</span>
               <input
-                id="reverse-making-slider"
-                type="range"
-                min="0"
-                max="20"
-                step="0.1"
-                value="3"
-              />
-              <small>Slider range: 0% to 20%</small>
-            </label>
-
-            <label class="making-input-field">
-              <span>Making charges %</span>
-              <input
-                id="reverse-making-input"
+                id="custom-grams-input"
                 type="number"
-                min="0"
+                min="0.1"
                 step="0.1"
-                value="3"
+                value="1"
                 inputmode="decimal"
               />
             </label>
+
+            <div class="calc-result" aria-live="polite">
+              <span>Final buy price</span>
+              <strong id="final-price-output"></strong>
+            </div>
+
+            <dl class="calc-breakdown">
+              <div>
+                <dt>Weight</dt>
+                <dd id="selected-grams-output">1 gm</dd>
+              </div>
+              <div>
+                <dt>Base gold</dt>
+                <dd id="base-price-output"></dd>
+              </div>
+              <div>
+                <dt>GST (3%)</dt>
+                <dd id="gst-price-output"></dd>
+              </div>
+              <div>
+                <dt>Making</dt>
+                <dd id="making-price-output"></dd>
+              </div>
+            </dl>
           </div>
 
-          <div class="grams-result-panel" aria-live="polite">
-            <span>Gold weight you can buy</span>
-            <strong id="grams-from-price-output">— gm</strong>
-          </div>
+          <div
+            class="calc-pane hidden"
+            id="calc-pane-budget"
+            role="tabpanel"
+            aria-labelledby="calc-mode-budget"
+            hidden
+          >
+            <label class="budget-price-field">
+              <span>Budget amount (INR)</span>
+              <input
+                id="budget-price-input"
+                type="number"
+                min="1"
+                step="1"
+                value="10000"
+                inputmode="decimal"
+                placeholder="Enter budget in INR"
+              />
+            </label>
 
-          <div class="calculator-breakdown">
-            <div>
-              <span>Budget</span>
-              <strong id="budget-price-output"></strong>
+            <div class="calc-result" aria-live="polite">
+              <span>Gold weight you can buy</span>
+              <strong id="grams-from-price-output">— gm</strong>
             </div>
-            <div>
-              <span>Base gold price</span>
-              <strong id="reverse-base-price-output"></strong>
-            </div>
-            <div>
-              <span>GST (3%)</span>
-              <strong id="reverse-gst-price-output"></strong>
-            </div>
-            <div>
-              <span>Making charges</span>
-              <strong id="reverse-making-price-output"></strong>
-            </div>
+
+            <dl class="calc-breakdown">
+              <div>
+                <dt>Budget</dt>
+                <dd id="budget-price-output"></dd>
+              </div>
+              <div>
+                <dt>Base gold</dt>
+                <dd id="reverse-base-price-output"></dd>
+              </div>
+              <div>
+                <dt>GST (3%)</dt>
+                <dd id="reverse-gst-price-output"></dd>
+              </div>
+              <div>
+                <dt>Making</dt>
+                <dd id="reverse-making-price-output"></dd>
+              </div>
+            </dl>
           </div>
-        </section>
+        </div>
       </section>
 
-      <section class="rates-panel">
-        <div class="panel-head">
-          <div>
-            <p class="eyebrow">Supporting rates</p>
-            <h2 class="panel-title">Silver and platinum</h2>
-          </div>
-          <p class="panel-note" data-bind="panelNote"></p>
+      <footer class="page-footer">
+        <p class="footer-copy" data-bind="cacheMessage"></p>
+        <div class="footer-actions">
+          <button
+            class="install-button hidden"
+            type="button"
+            id="install-button"
+          >
+            Install app
+          </button>
+          <button class="refresh-button" type="button" id="refresh-button">
+            Refresh rates
+          </button>
         </div>
-
-        <div class="supporting-grid">
-          <article class="rate-card silver-card">
-            <p class="card-label">Silver</p>
-            <p class="card-rate" data-bind="silverPrice"></p>
-            <p class="card-time" data-bind="silverTime"></p>
-          </article>
-
-          <article class="rate-card platinum-card">
-            <p class="card-label">Platinum</p>
-            <p class="card-rate" data-bind="platinumPrice"></p>
-            <p class="card-time" data-bind="platinumTime"></p>
-          </article>
-        </div>
-
-        <div class="footer-bar">
-          <p class="footer-copy" data-bind="cacheMessage"></p>
-          <div class="footer-actions">
-            <button
-              class="install-button hidden"
-              type="button"
-              id="install-button"
-            >
-              Install app
-            </button>
-            <button class="refresh-button" type="button" id="refresh-button">
-              Refresh rates
-            </button>
-          </div>
-        </div>
-      </section>
+      </footer>
     </template>
 
     <template id="error-template">
@@ -394,7 +342,7 @@
             <h1 class="hero-title">Rates are temporarily unavailable</h1>
             <p class="hero-subtitle" data-bind="errorMessage"></p>
 
-            <div class="footer-bar compact">
+            <div class="page-footer compact">
               <p class="footer-copy">
                 Try again to request the latest gold, silver, and platinum
                 rates.
