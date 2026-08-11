@@ -367,12 +367,68 @@ select {
 .budget-price-field input,
 .making-input-field input {
   width: 100%;
+  min-height: 48px;
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 14px;
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(8, 18, 23, 0.72);
   color: var(--text);
   padding: 12px 14px;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  outline: none;
+  -moz-appearance: textfield;
+  appearance: textfield;
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    background-color 160ms ease;
+}
+
+.custom-grams-field input::-webkit-outer-spin-button,
+.custom-grams-field input::-webkit-inner-spin-button,
+.budget-price-field input::-webkit-outer-spin-button,
+.budget-price-field input::-webkit-inner-spin-button,
+.making-input-field input::-webkit-outer-spin-button,
+.making-input-field input::-webkit-inner-spin-button {
+  margin: 0;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.custom-grams-field input::placeholder,
+.budget-price-field input::placeholder,
+.making-input-field input::placeholder {
+  color: rgba(175, 187, 184, 0.7);
+}
+
+.custom-grams-field input:hover,
+.budget-price-field input:hover,
+.making-input-field input:hover {
+  border-color: rgba(232, 197, 109, 0.28);
+  background: rgba(8, 18, 23, 0.88);
+}
+
+.custom-grams-field input:focus,
+.budget-price-field input:focus,
+.making-input-field input:focus {
+  border-color: rgba(232, 197, 109, 0.55);
+  background: rgba(8, 18, 23, 0.95);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.04),
+    0 0 0 3px rgba(232, 197, 109, 0.16);
+}
+
+.budget-price-field input {
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  padding: 14px 16px;
+  min-height: 54px;
+  border-color: rgba(232, 197, 109, 0.22);
+  background: linear-gradient(
+    180deg,
+    rgba(18, 34, 44, 0.96),
+    rgba(8, 18, 23, 0.96)
+  );
 }
 
 .making-range-field input[type="range"] {
