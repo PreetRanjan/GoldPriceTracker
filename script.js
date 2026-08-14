@@ -2,7 +2,7 @@ const API_URL =
   "https://api.lalithaajewellery.com/public/pricings/latest?state_id=fbe51d69-c3ef-466f-a8f4-7c382759e35f";
 const proxyConfig = window.GOLDTRACKER_PROXY_URL;
 const PROXY_URL = typeof proxyConfig === "string" ? proxyConfig.trim() : "";
-const CACHE_KEY = "gold-tracker-pricing-cache-v1";
+const CACHE_KEY = "gold-tracker-pricing-cache-v2";
 const CACHE_TTL = 5 * 60 * 1000;
 const GST_RATE = 3;
 const DEFAULT_MAKING_CHARGE = 3;
@@ -125,18 +125,35 @@ function normalizePayload(json, source) {
   }
 
   const { data } = json;
-  const { gold, silver, platinum } = data.prices;
+  const { silver, platinum } = data.prices;
+  const gold22k = data.prices.gold_22kt || data.prices.gold;
+  const gold24k = data.prices.gold_24kt;
 
-  if (!gold || !silver || !platinum || !data.rate_updated_time) {
+  if (!gold22k || !silver || !platinum || !data.rate_updated_time) {
     throw new Error("Required pricing fields are missing in the API response.");
   }
+
+  const gold22kPrice = Number(gold22k.price);
+  const gold24kPrice = Number.isFinite(Number(gold24k?.price))
+    ? Number(gold24k.price)
+    : gold22kPrice * (24 / 22);
 
   return {
     source,
     stateName: data.state_name || "Karnataka",
-    rateUpdatedTime: data.rate_updated_time,
+    rateUpdatedTime:
+      gold22k.rate_datetime || data.rate_updated_time,
     metals: {
-      gold: normalizeMetal(gold),
+      gold: {
+        label: gold22k.metal_type || "Gold (22KT)",
+        price: gold22kPrice,
+        updatedAt: gold22k.rate_datetime || data.rate_updated_time,
+      },
+      gold24k: {
+        label: gold24k?.metal_type || "Gold (24KT)",
+        price: gold24kPrice,
+        updatedAt: gold24k?.rate_datetime || data.rate_updated_time,
+      },
       silver: normalizeMetal(silver),
       platinum: normalizeMetal(platinum),
     },
@@ -154,7 +171,8 @@ function normalizeMetal(metal) {
 function renderDashboard(payload, fromCache, warningMessage = "") {
   const fragment = dashboardTemplate.content.cloneNode(true);
   const goldPricePerGram = payload.metals.gold.price;
-  const estimatedTwentyFourKPrice = goldPricePerGram * (24 / 22);
+  const goldTwentyFourKPrice =
+    payload.metals.gold24k?.price ?? goldPricePerGram * (24 / 22);
 
   setText(fragment, "statusLabel", buildStatusLabel(payload.source, fromCache));
   setText(fragment, "todayLabel", fullDateFormatter.format(new Date()));
@@ -164,12 +182,12 @@ function renderDashboard(payload, fromCache, warningMessage = "") {
   setText(
     fragment,
     "goldTwentyFourKPrice",
-    currencyFormatter.format(estimatedTwentyFourKPrice),
+    currencyFormatter.format(goldTwentyFourKPrice),
   );
   setText(
     fragment,
     "goldTwentyFourKTenGramPrice",
-    currencyFormatter.format(estimatedTwentyFourKPrice * 10),
+    currencyFormatter.format(goldTwentyFourKPrice * 10),
   );
   setText(
     fragment,

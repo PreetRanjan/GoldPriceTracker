@@ -1,4 +1,4 @@
-const CACHE_NAME = "goldtracker-shell-v4";
+const CACHE_NAME = "goldtracker-shell-v5";
 const CORE_ASSETS = [
   "./",
   "./index.html",
